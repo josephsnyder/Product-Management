@@ -52,7 +52,7 @@
       <div id="description"></div>
   </div>
 </div>
-<div id="treeview_placeholder"/>
+<div id="treeview_placeholder">
 <script type="text/javascript">
 var chart = d3.chart.treeview()
               .height(1280)
@@ -96,6 +96,18 @@ d3.json("packages.json", function(json) {
      .on("circle", "attr", "r", function(d) { return 7 - d.depth; });
   d3.select("#treeview_placeholder").datum(json).call(chart);
   createLegend();
+  
+  //Testing for main window load
+  
+  // Checks the name of the first node
+  // checks that the children of the first node have a populated name
+  QUnit.test("mainPage_test", function() {
+    var nodes = chart.nodes()
+    equal(nodes["name"],"Vista","First node is correct");
+    $(nodes.children).each(function(i,d) {
+      ok(/[A-Za-z&\/]/.test(d.name), "First level of children is populated. Found " + d.name)
+    })
+  });
 });
 
 function _expandAllNode() {
@@ -168,7 +180,22 @@ function pkgLinkClicked(d) {
     // var pkgUrl = package_link_url + d.name.replace(/ /g, '_') + ".html";
     // var win = window.open(pkgUrl, '_black');
     // win.focus();
-  }
+
+    QUnit.test("modalWindow_test", function() {
+      // Tests for Modal window
+      // Check for presence of each accordion header
+      // Check for content: link or text inside of each one
+      equal($('#ui-accordion-accordion-header-0')[0].innerText,"Namespaces","Namespace Header exists");
+      ok($("#namespaces")[0].innerHTML.search("Includes:.+Excludes") != -1, "Namespace content has appropriate headers");
+      equal($('#ui-accordion-accordion-header-1')[0].innerText,"Dependencies","Dependencies Header exists");
+      ok(/href/.test($("#dependencies")[0].innerHTML), "Dependencies contains a link");
+      equal($('#ui-accordion-accordion-header-2')[0].innerText,"Interfaces","Interfaces Header exists");
+      console.log($("#interface")[0].innerHTML);
+      ok($("#interface")[0].innerHTML.search("M API.+Web Service API.+HL7") != -1, "Interface content contains correct text")
+      equal($('#ui-accordion-accordion-header-3')[0].innerText,"Description","Description Header exists");
+      ok($("#description")[0].innerHTML.search("[A-Za-z]+") != -1, "description content exists")      
+    })     
+  }  
   else{
     chart.onNodeClick(d);
   }
@@ -190,6 +217,9 @@ function getPackageDoxLink(pkgName, node) {
   else {
     doxUrl.push(getDistributionPropByName(node.distribution[0]).doxlink);
   }
+  QUnit.test("PackageDox_test", function() {
+    ok(/http:\/\/code.osehra.org\/dox\/Package/.test(doxUrl),"Link found in Package Dox content");
+  })
   return doxUrl;  // + "Package_" + doxLinkName + ".html";
 }
 
@@ -290,7 +320,11 @@ function getDependencyContentHtml(pkgName, node) {
     else {depLink_str += distProp[selectedIndex].name +" Dependencies & Code View" + "</a></h4>";}
     depLink.push(depLink_str);
   }
+  QUnit.test("dependencyContent_test", function() {
+    ok(/http:\/\/.+dox/.test(depLink),"link found in dependency content");
+  })
   return depLink;
+
 }
 
 function change_node_color(node) {
@@ -348,6 +382,11 @@ function node_onMouseOver(d) {
   toolTip.style("left", (d3.event.pageX + 20) + "px")
          .style("top", (d3.event.pageY + 5) + "px")
          .style("opacity", ".9");
+         
+  //QUnit.test("tooltip_test", function() {
+  //  ok($("#toolTip")[0].innerHTML.search("Includes:.+") != -1, "");
+  //  ok($("#toolTip")[0].innerHTML.search("Excludes:.+") != -1, "");
+  //})
 }
 
 function node_onMouseOut(d) {
@@ -390,7 +429,25 @@ function createLegend() {
       .text(function(d) {
         return  d.distribution; 
       });
+  // Tests for legend
+  // Check name and link for each entry in the legend
+  QUnit.test("legend_test", function() {
+    $(".legend").each( function(i,d) {
+      console.log(d.innerHTML)
+      ok(d.innerHTML.search(distProp[i]["distribution"]), "Legend text is correct: " + distProp[i]["distribution"]);
+      ok(d.innerHTML.search(distProp[i]["doxlink"]), "Legend link is correct: " + distProp[i]["doxlink"]);
+    })
+  })
 }
     </script>
+  </div>
+    </div>
+    <div id="qunit">
+      <h1 id="qunit-header">QUnit Test Suite</h1>
+      <h2 id="qunit-banner"></h2>
+      <div id="qunit-testrunner-toolbar"></div>
+      <h2 id="qunit-userAgent"></h2>
+      <ol id="qunit-tests"></ol>
+    </div>
   </body>
 </html>

@@ -13,6 +13,7 @@ style="border-width:0" height="35" width="150" alt="OSEHRA Logo" /></a>
     <li><a href="bff_demo.php">VHA BFF Demo</a></li>
     <li><a href="vista_pkg_dep.php">VistA Package Dependency</a></li>
     <li><a href="javascript:aboutClicked();">About</a></li>
+    <li><a href="javascript:showTesting();">ShowTesting</a></li>
     <li><a href="http://www.osehra.org/content/visualization-open-source-project-group">Join the Visualization Working Group</a></li>
     <li class="dropdown">
       <a class="dropdown-toggle" data-toggle="dropdown" href="#">
@@ -35,6 +36,10 @@ style="border-width:0" height="35" width="150" alt="OSEHRA Logo" /></a>
       title: "About VIVIAN"
     };
     $('#dialog-modal-about').dialog(overlayDialogObj).show();
+  }
+  
+  function showTesting(){
+    $('#qunit').toggleClass("hidden");
   }
 </script>
 <div id="dialog-modal-about" style="display:none">

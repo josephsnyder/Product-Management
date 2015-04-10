@@ -26,7 +26,7 @@
             source: sortedjson,
             select: autoCompleteChanged
             //change: autoCompleteChanged
-          }).val('EVE: System Manager Menu').data('autocomplete')._trigger('select');
+          }).val('EVE: System Manager Menu').data('autocomplete')/*._trigger('select')*/;
         });
       });
     </script>
@@ -146,7 +146,11 @@ function resetMenuFile(menuFile) {
        .on("circle", "attr", "r", function(d) { return 7 - d.depth/2; });
     d3.select("#treeview_placeholder").datum(json).call(chart);
     generate_legend();
-  });
+    QUnit.test("resetmenu_test", function() {
+      equal(chart.nodes().name,json["name"],"Generated Structure matches menuFile");
+      
+    });
+  })
 }
 
 var toolTip = d3.select(document.getElementById("toolTip"));
@@ -154,7 +158,6 @@ var header = d3.select(document.getElementById("head"));
 
 function node_onMouseClick(d) {
   chart.onNodeClick(d);
-  console.log()
   if(selectedIndex !== 0){
     d3.selectAll("text")
       .attr("fill", function (d) {
@@ -176,7 +179,7 @@ function node_onMouseOver(d) {
   header.html(headText);
   toolTip.style("left", (d3.event.pageX + 20) + "px")
          .style("top", (d3.event.pageY + 5) + "px")
-         .style("opacity", ".9");
+         .style("opacity", ".9");  
 }
 
 function node_onMouseOut(d) {
@@ -212,8 +215,23 @@ function generate_legend() {
     .attr("fill",function(d) {return d.color;})
     .text(function(d) {return  d.dName; });
 
-}
-    </script>
+  QUnit.test("menu_test", function() {
+    equal($(".legend")[0].textContent,"All Types","Legend first entry created correctly");
+    ok($(".legend").length==10,"Legend all entries created correctly");
+    $(".legend").each( function(i,d) {
+      equal(d.textContent, menuType[i]["dName"], "Display is correct: " + menuType[i]["dName"]);
+    });
+  });
+};  
+</script>
+  </div>
+    <div id="qunit" class="hidden">
+      <h1 id="qunit-header">QUnit Test Suite</h1>
+      <h2 id="qunit-banner"></h2>
+      <div id="qunit-testrunner-toolbar"></div>
+      <h2 id="qunit-userAgent"></h2>
+      <ol id="qunit-tests"></ol>
+    </div>
   </body>
 </html>
 
