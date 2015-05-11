@@ -1,4 +1,10 @@
 <div style="position:relative; left:20px; top:2px;">
+<script src="./static/mocha.js"></script>
+<script src="./static/should.min.js"></script>
+<script type="text/javascript" src="./static/blanket.min.js"></script>
+<script type="text/javascript" src="./static/mocha-blanket.js"></script>
+<link rel="stylesheet" href="./static/mocha.css">
+
 <a href="http://www.osehra.org">
 <img src="http://www.osehra.org/profiles/drupal_commons/themes/commons_osehra_earth/logo.png"
 style="border-width:0" height="35" width="150" alt="OSEHRA Logo" /></a>
@@ -25,6 +31,7 @@ style="border-width:0" height="35" width="150" alt="OSEHRA Logo" /></a>
     </li>
   </ul>
 </div>
+
 <script>
   function aboutClicked(){
     var overlayDialogObj = {
@@ -38,9 +45,7 @@ style="border-width:0" height="35" width="150" alt="OSEHRA Logo" /></a>
     $('#dialog-modal-about').dialog(overlayDialogObj).show();
   }
   
-  function showTesting(){
-    $('#qunit').toggleClass("hidden");
-  }
+
 </script>
 <div id="dialog-modal-about" style="display:none">
   <div id='About'>
