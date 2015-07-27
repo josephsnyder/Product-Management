@@ -1,0 +1,49 @@
+# OSEHRA ViViAN Common Dashboard Script
+#
+# This script contains basic dashboard driver code common to all
+# clients.
+#
+# Put this script in a directory such as "~/Dashboards/Scripts" or
+# "c:/Dashboards/Scripts".  Create a file next to this script, say
+# 'my_dashboard.cmake', with code of the following form:
+#
+#   # Client maintainer: me@mydomain.net
+   set(CTEST_SITE "THESSIA")
+   set(CTEST_BUILD_NAME "Win32-ViViAN")
+#
+#  
+   set(VIVIAN_WEB_ROOT "http://thessia.kitware.com/Product-Management/instrumented")
+   set(dashboard_root_name "D:/wamp/www")
+   set(CTEST_DASHBOARD_ROOT "${dashboard_root_name}")
+   set(dashboard_do_coverage ON)
+   # Include the common dashboard script.
+   include(${CTEST_SCRIPT_DIRECTORY}/vivian_common.cmake)
+
+# Then run a scheduled task (cron job) with a command line such as
+#
+#   ctest -S ~/Dashboards/Scripts/my_dashboard.cmake -V
+#
+# By default the source and build trees will be placed in the path
+# "../MyTests/" relative to your script location.
+#
+# The following variables may be set before including this script
+# to configure it:
+#
+#   dashboard_model       = Nightly | Experimental | Continuous
+#   dashboard_root_name   = Change name of "My Tests" directory
+#   dashboard_source_name = Name of source directory (VistA)
+#   dashboard_binary_name = Name of binary directory (VistA-build)
+#   dashboard_CMakeCache  = Initial CMakeCache.txt file content
+#   dashboard_do_coverage = True to enable coverage (ex: gcov)
+#   dashboard_do_memcheck = True to enable memcheck (ex: valgrind)
+#   CTEST_GIT_COMMAND     = path to git command-line client
+#   CTEST_BUILD_FLAGS     = build tool arguments (ex: -j2)
+#   CTEST_DASHBOARD_ROOT  = Where to put source and build trees
+#   CTEST_TEST_TIMEOUT    = Per-test timeout length
+#   CTEST_TEST_ARGS       = ctest_test args (ex: PARALLEL_LEVEL 4)
+#   CMAKE_MAKE_PROGRAM    = Path to "make" tool to use
+#
+# Options to configure Git:
+#   dashboard_git_url      = Custom git clone url
+#   dashboard_git_branch   = Custom remote branch to track
+#   dashboard_git_crlf     = Value of core.autocrlf for repository

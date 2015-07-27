@@ -1,4 +1,5 @@
 <div style="position:relative; left:20px; top:2px;">
+<script type="text/javascript" src="jscoverage.js"></script>
 <a href="http://www.osehra.org">
 <img src="http://www.osehra.org/profiles/drupal_commons/themes/commons_osehra_earth/logo.png"
 style="border-width:0" height="35" width="150" alt="OSEHRA Logo" /></a>
@@ -13,6 +14,8 @@ style="border-width:0" height="35" width="150" alt="OSEHRA Logo" /></a>
     <li><a href="bff_demo.php">VHA BFF Demo</a></li>
     <li><a href="vista_pkg_dep.php">VistA Package Dependency</a></li>
     <li><a href="javascript:aboutClicked();">About</a></li>
+    <li><a id="run_cov" href="javascript:runCov();">Run Coverage</a></li>
+    <li><a id="sav_cov" download="coverage.json" style="display: hidden" >Save coverage</a></li>
     <li><a href="http://www.osehra.org/content/visualization-open-source-project-group">Join the Visualization Working Group</a></li>
     <li class="dropdown">
       <a class="dropdown-toggle" data-toggle="dropdown" href="#">
@@ -36,6 +39,24 @@ style="border-width:0" height="35" width="150" alt="OSEHRA Logo" /></a>
     };
     $('#dialog-modal-about').dialog(overlayDialogObj).show();
   }
+  
+  function runCov() {
+  var textFile = null;
+  var data = new Blob([jscoverage_serializeCoverageToJSON()], {type: 'text/plain'});
+
+    // If we are replacing a previously generated file we need to
+    // manually revoke the object URL to avoid memory leaks.
+    if (textFile !== null) {
+      window.URL.revokeObjectURL(textFile);
+    }
+
+    textFile = window.URL.createObjectURL(data);
+
+    // returns a URL you can use as a href
+    var save = document.getElementById("sav_cov");
+    save.href=textFile;
+    save.style.display = 'block';
+}
 </script>
 <div id="dialog-modal-about" style="display:none">
   <div id='About'>

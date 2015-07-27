@@ -20,5 +20,34 @@ The source tree is organized as follows:
 
 * `<index.php>`__: Product Management Visualization Web Page.
 
+
+Coverage via JSCover_ and CDash
+--------------------------------
+
+The VistA Product Management Visualization repository now has the capability
+to test the web interface using the Selenium_ tool.  Using the ``filesystem``
+mode of JSCover, we can generate instrumented Javascript files and calculate
+the coverage of the Selenium testing.  This ``filesystem`` mode is executed by
+running the JSCover-all.jar file with the ``-fs`` argument.  Help is available
+for the mode by running it with a ``-h``::
+
+
+Usage: java -jar JSCover-all.jar -fs [OPTION]... SOURCE-DIRECTORY DESTINATION-DIRECTORY
+Instrument JavaScript with code coverage information.
+
+Options:
+      --js-version=VERSION  use the specified JavaScript version
+      --no-instrument=PATH  copy but do not instrument PATH
+      --exclude=PATH        don't copy from source/PATH
+      --branch              collect branch coverage data
+  -h, --help                display this help and exit
+
+An example used locally would 
+
+::
+ /path.to/java -jar ~/jscover/target/dist/JSCover-all.jar -fs --no-instrument=lib Visual/ instrumented/ 
+
 .. _`OSEHRA VistA Repository`: https://github.com/OSEHRA/VistA.git
+.. _JScover: http://tntim96.github.io/JSCover/
+.. _Selenium: http://www.seleniumhq.org/
 
