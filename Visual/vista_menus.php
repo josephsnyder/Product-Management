@@ -60,33 +60,25 @@
       <div id="head" class="header"></div>
       <div  class="tooltipTail"></div>
   </div>
-
-  <div style="position:absolute; left:20px; top:100px;">
-    <label for="autocomplete">Select a top level menu: </label>
-  </div>
-  <div style="position:absolute; left:20px; top:120px;">
+<div id='title' style="position:relative; top:10px; left:30px; font-size:.97em;">
+ <p title="This tree visualization represents the menu hierarchy of VistA. Mouse over any of the entries in the tree to see the menu option name and the security key (if any). Click on an item to see the menu option details."> VistA Menus </p>
+  <div style="position:relative;" >
+    <label title="Show the structure of a top level menu by entering the name of the option." style="width:200;" for="autocomplete">Select a top level menu: </label>
     <input id="autocomplete" size="40">
   </div>
-  <div style="font-size:10px; position:absolute; left:220px; top:240px;">
+  <div>
+    <label title="Search for an option by entering the name of the option that you wish to find."> Search for an Option:</label>
+    <input id="option_autocomplete" size="40">
+  </div>
+  <div>
     <button onclick="_collapseAllNode()">Collapse All</button>
     <button onclick="_resetAllNode()">Reset</button>
   </div>
-  <div class='hint' style="position:absolute; top:160px; left:20px; font-size:0.9em; width:350px;">
-  <p>
-This tree visualization represents the menu hierarchy of VistA. Mouse over any of the entries in the tree to see the menu option name and the security key (if any). Click on an item to see the menu option details.
-  </p>
-  <div style="position:absolute; left:0px; top:100px;">
-    <label> Search for an Option</label>
-    <div class='hint' style="position:absolute; font-size:0.9em; width:350px;">
-      <p>Search for an option by entering the Menu Text of the option that you wish to find.  The search is capitalization independent, but the path to the targeted option may not be highlighted if the case doesn't match.</p>
-      <div id="search_result"> </div>
-      <input id="option_autocomplete" size="40">
-      <br></br>
-    </div>
-  </div>
-  </div>  
+</div>
+</br>
+<div id="legend_placeholder"></div>
+<div id="treeview_placeholder"></div>
 
-  <div id="treeview_placeholder">
 <script type="text/javascript">
 var chart = d3.chart.treeview()
               .height(1050)
@@ -94,6 +86,20 @@ var chart = d3.chart.treeview()
               .margins({top: 42, left: 260, bottom: 0, right: 0})
               .textwidth(300)
               .nodeTextHyperLink(getOptionDetailLink);
+var legendShapeChart = d3.chart.treeview()
+              .height(50)
+              .width(350)
+              .margins({top:42, left:10, right:0, bottom:0})
+              .textwidth(110);
+var legendTypeChart = d3.chart.treeview()
+              .height(50)
+              .width(1100)
+              .margins({top:42, left:0, right:0, bottom:0})
+              .textwidth(110);
+
+var shapeLegend = [{name: "Menu", shape: "triangle-up"},
+                   {name: "Option", shape:"circle"}]
+
 chart.on("text","attr","fill",color_by_type);
 var selectedIndex=0;
 var target_option='';
@@ -176,9 +182,12 @@ function resetMenuFile(menuFile) {
        .on("node", "event","mouseout", node_onMouseOut)
        .on("text", "attr", "cursor", function(d) { return "pointer"; })
        //.on("text", "event","click", node_onMouseClick)
-       .on("circle", "event", "click", node_onMouseClick)
-       .on("circle", "attr", "r", function(d) { return 7 - d.depth/2; });
+       .on("path", "event", "click", node_onMouseClick)
+       .on("path", "attr", "r", function(d) { return 7 - d.depth/2; });
     d3.select("#treeview_placeholder").datum(json).call(chart);
+    d3.select("#legend_placeholder").datum(null).call(legendShapeChart);
+    d3.select("#legend_placeholder").datum(null).call(legendTypeChart);
+    createShapeLegend();
     generate_legend();
     if(target_option != '') {
       openSpecificOption(chart.nodes());
@@ -187,6 +196,7 @@ function resetMenuFile(menuFile) {
 
   });
 }
+
 var toolTip = d3.select(document.getElementById("toolTip"));
 var header = d3.select(document.getElementById("head"));
 
@@ -228,11 +238,11 @@ function node_onMouseOut(d) {
 }
 
 function generate_legend() {
-  var legend = chart.svg().selectAll("g.legend")
+  var legend = legendTypeChart.svg().selectAll("g.legend")
     .data(menuType)
     .enter().append("svg:g")
     .attr("class", "legend")
-    .attr("transform", function(d, i) { return "translate(" + (i * 110 + 100) +",-10)"; })
+    .attr("transform", function(d, i) { return "translate(" + (i * 110) +",-10)"; })
     .on("click", function(d) {
       selectedIndex = menuType.indexOf(d);
       if(selectedIndex !== 0){
@@ -255,6 +265,13 @@ function generate_legend() {
     .attr("fill",function(d) {return d.color;})
     .text(function(d) {return  d.dName; });
 
+  var legend = legendTypeChart.svg()
+  legend.append("text")
+          .attr("x", 0)
+          .attr("y", -28 )
+          .attr("text-anchor", "left")
+          .style("font-size", "16px")
+          .text("Option Type Filter Menu");
 }
 
 //Enter Cost Information for Procedures
@@ -311,6 +328,33 @@ function highlight_path(chart, json) {
 
 }
 
+function createShapeLegend() {
+  var shapeLegendDisplay = legendShapeChart.svg().selectAll("g.shapeLegend")
+      .data(shapeLegend)
+    .enter().append("svg:g")
+      .attr("class", "shapeLegend")
+      .attr("transform", function(d, i) { return "translate("+(i * 200) +", -10)"; });
+  shapeLegendDisplay.append("path")
+      .attr("class", function(d) {return d.name;})
+      .attr("d", d3.svg.symbol().type(function(d) { return d.shape;}))
+      .attr("r", 3);
+
+  shapeLegendDisplay.append("svg:text")
+      .attr("class", function(d) {return d.name;})
+      .attr("x", 13)
+      .attr("dy", ".31em")
+      .text(function(d) {
+        return  d.name;
+      });
+
+  var shapeLegendDisplay = legendShapeChart.svg();
+  shapeLegendDisplay.append("text")
+          .attr("x", 0)
+          .attr("y", -28 )
+          .attr("text-anchor", "left")
+          .style("font-size", "16px")
+          .text("Shape Legend");
+}
     </script>
     </div>
   </body>
