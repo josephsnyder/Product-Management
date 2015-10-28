@@ -47,12 +47,17 @@ def traverseChildren(package):
       traverseChildren(child)
   else:
     pkgName = package['name']
-    package['hasLink'] = pkgName in pkgNameSet
+
+    package['hasLink'] = (pkgName in pkgNameSet) or ('isSubpackage' in package)
     if pkgName in pkgNameSet:
       package['Posprefixes'] = pkgPosNamePrefixes[pkgName]
       package['Negprefixes'] = pkgNegNamePrefixes[pkgName]
     if pkgName in pkgNameInterface:
       package['interfaces'] = pkgNameInterface[pkgName]
+
+  if "subpackage" in package:
+    for child in package['subpackage']:
+      traverseChildren(child)
 
 def main():
   generate_packages_json()

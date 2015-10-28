@@ -9,6 +9,9 @@ function expandAllNode(root) {
   //root.children.forEach(toggleAll);
   expand(root)
   root.children.forEach(expandAll);
+  if(root.hasSubpackage) {
+    root.subpackage.forEach(expandAll);
+  }
 }
 
 function collapseAllNode(root) {
@@ -52,14 +55,27 @@ function collapseAll(d) {
 
 // Collapse Node.
 function collapse(d) {
+  if(d.hasSubpackage ) {
+    if (d.children) {
+        d.subpackage = d.children;
+        d.children = null;
+    }
+  }
   if (d.children) {
     d._children = d.children;
     d.children = null;
   }
+
 }
 
 // Expand children.
 function expand(d) {
+  if(d.hasSubpackage ) {
+    if (d.subpackage){
+      d.children = d.subpackage;
+      d.subpackage = null;
+    }
+  }
   if (d._children) {
     d.children = d._children;
     d._children = null;

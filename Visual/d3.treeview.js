@@ -63,7 +63,6 @@ d3.chart.treeview = function(option) {
                     return "translate(" + _margins.left + "," + _margins.top + ")";
                   });
       }
-
       renderBody(_svg);
   };
 
@@ -195,7 +194,7 @@ d3.chart.treeview = function(option) {
 
   function find_node_shape(d){
   var shape = "circle"
-  if (d.children || d._children) {
+  if ((d.children || d._children) && !d.hasSubpackage) {
     shape = "triangle-up";
   }
   else if (d.hasSubpackage) {
@@ -219,11 +218,12 @@ d3.chart.treeview = function(option) {
         textEnter = nodeEnter.append("svg:text");
       }
       textEnter = textEnter.attr("x", function (d) {
-                  return d.children || d._children ? -10 : 10;
+                  return ((d.children || d._children) && !d.hasSubpackage) ? -10 : 10;
               })
               .attr("dy", ".35em")
               .attr("text-anchor", function (d) {
-                  return d.children || d._children ? "end" : "start";
+                  var l = ((d.children || d._children) && !d.hasSubpackage) ? "end" : "start";
+                  return l;
               })
               .text(function (d) {
                   return d.name;
@@ -263,13 +263,23 @@ d3.chart.treeview = function(option) {
   }
 
   function toggle(d) {
-      if (d.children) {
+      if(d.hasSubpackage ) {
+        if (d.children) {
+            d.subpackage = d.children;
+            d.children = null;
+        } else {
+            d.children = d.subpackage;
+            d.subpackage = null;
+        }
+      }
+      else if (d.children) {
           d._children = d.children;
           d.children = null;
       } else {
           d.children = d._children;
           d._children = null;
       }
+
   }
 
   function toggleAll(d) {

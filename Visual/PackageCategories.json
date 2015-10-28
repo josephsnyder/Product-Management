@@ -90,8 +90,19 @@
                                 "VA", 
                                 "DSS"
                             ], 
-                            "name": "PCE Patient Care Encounter"
-                        }, 
+                            "name": "PCE Patient Care Encounter",
+                            "hasSubpackage": true,
+                            "subpackage" : [
+                              {
+                                "distribution": [
+                                     "OSEHRA",
+                                     "VA",
+                                     "DSS"
+                                 ],
+                                 "name": "Immunization",
+                                 "isSubpackage": true
+                              }
+                        ]},
                         {
                             "distribution": [
                                 "OSEHRA", 
@@ -372,14 +383,6 @@
                                 "VA", 
                                 "DSS"
                             ], 
-                            "name": "Immunization"
-                        }, 
-                        {
-                            "distribution": [
-                                "OSEHRA", 
-                                "VA", 
-                                "DSS"
-                            ], 
                             "name": "Social Work"
                         }, 
                         {
@@ -480,7 +483,28 @@
                                 "VA", 
                                 "DSS"
                             ], 
-                            "name": "Kernel"
+                            "name": "Kernel",
+                            "hasSubpackage": true,
+                            "subpackage" : [
+                              {
+                                "distribution": [
+                                     "OSEHRA",
+                                     "VA",
+                                     "DSS"
+                                 ],
+                                 "name": "Unwinder",
+                                 "isSubpackage": true
+                              },
+                              {
+                                "distribution": [
+                                     "OSEHRA",
+                                     "VA",
+                                     "DSS"
+                                 ],
+                                 "name": "Help Processor",
+                                 "isSubpackage": true
+                              }
+                            ]
                         }, 
                         {
                             "distribution": [

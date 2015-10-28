@@ -70,7 +70,7 @@ var chart = d3.chart.treeview()
               .textwidth(220);
 var legendShapeChart = d3.chart.treeview()
               .height(50)
-              .width(350)
+              .width(800)
               .margins({top:42, left:10, right:0, bottom:0})
               .textwidth(110);
 var legendDistChart = d3.chart.treeview()
@@ -102,19 +102,29 @@ var distProp = [ // constants to store property of each distribution
   } **/
 ];
 
+var modalConnections = [
+{id:"#namespaces",header:'#ui-accordion-accordion-header-0'},
+{id:"#dependencies",header:'#ui-accordion-accordion-header-1'},
+{id:"#interface",header:'#ui-accordion-accordion-header-2'},
+{id:"#description",header:'#ui-accordion-accordion-header-4'},
+{id:"#subpackage",header:'#ui-accordion-accordion-header-5'}
+]
 var shapeLegend = [{name: "Package Category", shape: "triangle-up"},
-                   {name: "Package", shape:"circle"}]
+                   {name: "Package", shape:"circle"},
+                   {name: "Package with subpackage", shape:"diamond"},
+                   {name: "SubPackage", shape:"square"}]
 var himInfoJSON;
 
 d3.json("packages.json", function(json) {
   resetAllNode(json);
-  chart.on("node", "event","click", pkgLinkClicked)
+  chart.on("node", "event","click", chart.onNodeClick)
      .on("node", "event", "mouseover", node_onMouseOver)
      .on("node", "event","mouseout", node_onMouseOut)
      .on("text", "attr", "cursor", function(d) {
         return d.hasLink !== undefined && d.hasLink ? "pointer" : "hand";
       })
      .on("text", "attr", "fill", change_node_color)
+     .on("text", "event", "click", pkgLinkClicked)
      .on("path", "style", "fill", change_circle_color)
      .on("path", "attr", "r", function(d) { return 7 - d.depth; });
   d3.select("#treeview_placeholder").datum(json).call(chart);
@@ -159,39 +169,44 @@ var sddesc = "<p>The VistA Scheduling package allows a user to Schedule appointm
 " file to be sent to the Austin DPC are generated using this file.</p>";
 
 function pkgLinkClicked(d) {
+  $('.ui-accordion-header').show()
   if (d.hasLink) {
-    var overlayDialogObj = {
-      autoOpen: true,
-      height: 'auto',
-      width: 700,
-      modal: true,
-      position: ["center","center-50"],
-      title: "Package: " + d.name,
-      open: function(){
-          htmlLnk = getInterfaceHtml(d);
-          $('#interface').html(htmlLnk);
-          $('#namespaces').html(getNamespaceHtml(d))
-          $('#namespaces').show();
-          if (d.name === 'Scheduling'){
-            $('#description').html(sddesc);
-          }
-          else{
-            $('#description').html(d.name);
-          }
-          depLink = getDependencyContentHtml(d.name, d)
-          var depLink_html = "";
-          for(var i = 0; i < depLink.length;i++) {
-            depLink_html += depLink[i] + " ";
-          }
-          $('#dependencies').html(depLink_html);
-          $('#dependencies').show();
-          getHIMLink(d);
-          $('#accordion').accordion("option", "active", 0);
-          $('#accordion').accordion("refresh");
-          $('#accordion').accordion({heightStyle: 'content'}).show();
-      },
-   };
-   $('#dialog-modal').dialog(overlayDialogObj).show();
+      var overlayDialogObj = {
+        autoOpen: true,
+        height: 'auto',
+        width: 700,
+        modal: true,
+        position: ["center","center-50"],
+        title: getTitle(d),
+        open: function(){
+            $('#interface').html(getInterfaceHtml(d));
+            $('#namespaces').html(getNamespaceHtml(d))
+            $('#description').html(getDescriptionHtml(d))
+            $('#dependencies').html(getDependencyContentHtml(d.name, d));
+            getHIMLink(d);
+            $('#accordion').accordion("refresh");
+            $('#accordion').accordion({heightStyle: 'content'}).show();
+            $('#subpackage').html(getSubpackageHtml(d));
+            if(d.hasSubpackage) {
+              chart.onNodeClick(d);
+            }
+        },
+      }
+   $('#dialog-modal').dialog(overlayDialogObj);
+   var activeAccord = -1;
+   modalConnections.forEach( function (d,index) {
+     if ($(d.id)[0].innerHTML == '' || $(d.id)[0].innerHTML == '<ul></ul>') {
+       $(d.header).addClass('ui-state-disabled')
+     }
+     else {
+       if(activeAccord == -1) {
+         activeAccord = index;
+       }
+       $(d.header).removeClass('ui-state-disabled')
+     }
+   });
+   $('#accordion').accordion("option", "active",activeAccord);
+   $('#dialog-modal').show();
     // var pkgUrl = package_link_url + d.name.replace(/ /g, '_') + ".html";
     // var win = window.open(pkgUrl, '_black');
     // win.focus();
@@ -199,6 +214,36 @@ function pkgLinkClicked(d) {
   else{
     chart.onNodeClick(d);
   }
+}
+
+function getDescriptionHtml(d) {
+            if (d.name === 'Scheduling'){
+              return sddesc;
+            }
+            else{
+              return d.name;
+            }
+}
+
+function getSubpackageHtml(d) {
+  var html_text = "";
+  if( d.subpackage) {
+    d.subpackage.forEach( function(pack) {html_text += pack.name+ " ";});
+  }
+  else if( d.children) {
+    d.children.forEach( function(pack) {html_text += pack.name+ " ";});
+  }
+  return html_text;
+}
+
+function getTitle(node) {
+ var title_text='';
+ if(node.isSubpackage) {
+   title_text +="Sub"
+ }
+ title_text += "Package: " + node.name;
+
+ return title_text;
 }
 
 function getPackageDoxLink(pkgName, node) {
@@ -217,7 +262,7 @@ function getPackageDoxLink(pkgName, node) {
   else {
     doxUrl.push(getDistributionPropByName(node.distribution[0]).doxlink);
   }
-  return doxUrl;  // + "Package_" + doxLinkName + ".html";
+  return doxUrl;
 }
 
 function getDistributionPropByName(distName){
@@ -231,20 +276,26 @@ function getDistributionPropByName(distName){
 }
 
 function getNamespaceHtml(pkg) {
-  var i=0, len=pkg.Posprefixes.length;
-  var htmlLnk = "Includes:";
-  for (; i<len-1; i++) {
-    htmlLnk += "&nbsp;" + pkg.Posprefixes[i] + ",&nbsp;";
+  var i=0;
+  var htmlLnk='';
+  if(pkg.Posprefixes){
+    len=pkg.Posprefixes.length;
+    htmlLnk = "Includes:";
+    for (; i<len-1; i++) {
+      htmlLnk += "&nbsp;" + pkg.Posprefixes[i] + ",&nbsp;";
+    }
+    htmlLnk += "&nbsp;" + pkg.Posprefixes[i];
   }
-  htmlLnk += "&nbsp;" + pkg.Posprefixes[i];
-
-  var i=0, len=pkg.Negprefixes.length;
-  htmlLnk += "</br>Excludes:"
-  if(len > 0) {
+  i=0;
+  if(pkg.Negprefixes) {
+    var len=pkg.Negprefixes.length;
+    if(len > 0){
+    htmlLnk += "</br>Excludes:";
     for (; i<len-1; i++) {
       htmlLnk += "&nbsp;" + pkg.Negprefixes[i] + ",&nbsp;";
     }
     htmlLnk += "&nbsp;" + pkg.Negprefixes[i];
+    }
   }
   return htmlLnk;
 }
@@ -255,10 +306,12 @@ function getHIMLink(pkg) {
     var himPath = json[pkg.name];
     if (himPath == null) {
       $("#himInfo").html("")
+      $('#ui-accordion-accordion-header-3').addClass('ui-state-disabled')
     }
     else {
       var htmlLnk = "<a href='http://him.osehra.org/content/" + himPath +"'>HIM Visualization for "+ pkg.name +"</a>";
       $("#himInfo").html(htmlLnk);
+      $('#ui-accordion-accordion-header-3').removeClass('ui-state-disabled')
     }
   });
 }
@@ -310,12 +363,12 @@ function getInterfaceHtml(node) {
     htmlLnk += "</ul>";
   }
   else{
-    htmlLnk += "<li>M API</li>";
     if (rpcLink.length > 0) {
+      htmlLnk += "<li>M API</li>";
       htmlLnk += "<li>" + rpcLink + "</li>";
     }
-    htmlLnk += "<li>Web Service API</li>";
     if (hl7Link.length > 0){
+      htmlLnk += "<li>Web Service API</li>";
       htmlLnk += "<li>" + hl7Link + "</li>";
     }
     htmlLnk += "</ul>";
@@ -332,7 +385,11 @@ function getDependencyContentHtml(pkgName, node) {
     else {depLink_str += distProp[selectedIndex].name +" Dependencies & Code View" + "</a></h4>";}
     depLink.push(depLink_str);
   }
-  return depLink;
+  var depLink_html = "";
+  for(var i = 0; i < depLink.length;i++) {
+    depLink_html += depLink[i] + " ";
+  }
+  return depLink_html;
 }
 
 function change_node_color(node) {
@@ -357,7 +414,7 @@ function change_circle_color(d){
     return "lightsteelblue";
   }
   else {
-    if (d.hasLink !== undefined && selectedIndex > 0){
+    if (d.hasLink !== undefined && selectedIndex > 0 ){
       var category = distProp[selectedIndex];
       if (d.distribution !== undefined){
         var index = d.distribution.indexOf(category.name);
@@ -410,12 +467,12 @@ function createLegend() {
       .on("click", function(d) {
         selectedIndex = distProp.indexOf(d);
         d3.selectAll("text")
-          .filter(function (d) { return d.hasLink != undefined;})
+          .filter(function (d) {if(d) { return d.hasLink != undefined;}})
           .attr("fill", function (node) {
             return change_node_color(node);
           });
         d3.selectAll("path")
-          .filter(function (d) { return d.hasLink != undefined;})
+          .filter(function (d) { if(d) {return d.hasLink != undefined;}})
           .style("fill", function (d) {
             return change_circle_color(d);
           });
