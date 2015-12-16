@@ -36,6 +36,10 @@
   fill: #d62728;
 }
 
+.node--target.node--source {
+  fill: #660066;
+}
+
 .link--source,
 .link--target {
   stroke-opacity: 1;
@@ -49,5 +53,9 @@
 
 .link--target {
   stroke: #2ca02c;
+}
+
+.link--target.link--source {
+  stroke: #660066;
 }
 </style>

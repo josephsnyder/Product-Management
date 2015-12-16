@@ -79,6 +79,7 @@
     <div id="toolTip" class="tooltip" style="opacity:0;">
       <div id="header1" class="header"></div>
       <div id="dependency" style="color:#d62728;"></div>
+      <div id="bothDeps" style="color:#660066;"></div>
       <div id="dependents" style="color:#2ca02c;"></div>
       <div class="tooltipTail"></div>
     </div>
@@ -151,12 +152,22 @@
     function mouseOvered(d) {
       var header1Text = "Name: " + d.name + "</br> Group: " + d.parent.name + "</br>";
       $('#header1').html(header1Text);
+      var localDepends = [];
+      if (d.depends && d.dependents) {
+        localDepends = d.depends.filter(function(n) {
+          return d.dependents.indexOf(n) != -1
+        });
+      }
       if (d.depends) {
-        var depends = "Depends: " + d.depends.length;
+        var depends = "Depends: " + ( d.depends.length - localDepends.length);
         $('#dependency').html(depends);
       }
+      if (localDepends.length > 0 ) {
+       var both = "Both: " + localDepends.length;
+       $('#bothDeps').html(both);
+      }
       if (d.dependents) {
-        var dependents = "Dependents: " + d.dependents.length;
+        var dependents = "Dependents: " + (d.dependents.length - localDepends.length);
         $('#dependents').html(dependents);
       }
       d3.select("#toolTip").style("left", (d3.event.pageX + 40) + "px")
@@ -167,6 +178,7 @@
     function mouseOuted(d) {
       $('#header1').text("");
       $('#dependents').text("");
+      $('#bothDeps').text("");
       $('#dependency').text("");
       d3.select("#toolTip").style("opacity", "0");
     }
@@ -408,6 +420,7 @@ $(function () {
         var chart = $("#container").highcharts();
         var value = $(this).val();
         console.log(value);
+
         if (value == 1) {
           $('#frm-dep').hide();
           $('#frm-stats').show();
