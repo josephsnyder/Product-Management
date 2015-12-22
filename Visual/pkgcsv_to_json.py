@@ -10,12 +10,13 @@ def generate_packages_json():
   with open("packages.json", 'w') as outputFile:
     json.dump(pkgCatJson, outputFile)
   with open("packages_autocomplete.json", 'w') as autocompleteOutputFile:
-    packageNames = list(pkgNameSet)
+    packageNames = list(pkgAutoCompleteSet)
     packageNames.sort()
     json.dump(packageNames, autocompleteOutputFile)
 
 
 pkgNameSet = set()
+pkgAutoCompleteSet = set()
 pkgPosNamePrefixes = dict()
 pkgNegNamePrefixes = dict()
 pkgNameInterface = dict()
@@ -58,6 +59,7 @@ def traverseChildren(package, pkgDesJson):
     pkgName = package['name']
     package['hasLink'] = pkgName in pkgNameSet
     if pkgName in pkgNameSet:
+      pkgAutoCompleteSet.add(pkgName)
       package['Posprefixes'] = pkgPosNamePrefixes[pkgName]
       package['Negprefixes'] = pkgNegNamePrefixes[pkgName]
       for prefix in package['Posprefixes']:

@@ -166,6 +166,7 @@ function _resetAllNode() {
 function optionAutoCompleteChanged(event, ui) {
   target_option = ui.item.value;
   openSpecificOption();
+  removeHighlight()
   setTimeout(highlight_path,300,chart);
 }
 
@@ -227,16 +228,18 @@ function highlight(d) {
 
 function clearAutocomplete() {
   document.getElementById("option_autocomplete").value= '';
+  removeHighlight()
+}
+
+function removeHighlight() {
   chart.svg().selectAll("path.link").data(target_path).forEach(function(d) {
       for(var i =0; i< d.length; i++) {
         d[i].classList.remove("target");
       }
   });
-
   target_path = [];
   target_option='';
 }
-
 
 function pkgLinkClicked(d) {
   if (d.hasLink) {
