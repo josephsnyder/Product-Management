@@ -173,10 +173,10 @@ d3.chart.treeview = function(option) {
     _customization(circleUpdate, 'path', 'style');
 
     var nodeExit = node.exit().transition()
-            .attr("transform", function (d) {
+            /*.attr("transform", function (d) {
                 return "translate(" + source.y
         + "," + source.x + ")";
-            })
+            })*/
             .remove();
 
     nodeExit.select("g")
@@ -250,10 +250,10 @@ d3.chart.treeview = function(option) {
             .attr("d", _diagonal);
 
     link.exit().transition()
-            .attr("d", function (d) {
+            /*.attr("d", function (d) {
                 var o = {x: source.x, y: source.y};
                 return _diagonal({source: o, target: o});
-            })
+            })*/
             .remove();
   }
 
@@ -318,6 +318,10 @@ d3.chart.treeview = function(option) {
 
   chart.svg = function (n) {
     return _svg;
+  };
+
+  chart.tree = function (n) {
+    return _tree;
   };
 
   chart.on = function(target, type, prop, value) {

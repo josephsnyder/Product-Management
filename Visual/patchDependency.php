@@ -74,6 +74,7 @@
         <button onclick="_expandAllNode()">Expand All</button>
         <button onclick="_collapseAllNode()">Collapse All</button>
         <button onclick="_resetAllNode()">Reset</button>
+        <button onclick="_centerDisplay()">Center</button>
     </div>
   </div>
 
@@ -94,6 +95,7 @@ var toolTip = d3.select(document.getElementById("toolTip"));
 var header = d3.select(document.getElementById("header1"));
 var installDateTip = d3.select(document.getElementById("installDate"));
 var idVal= 0;
+var originalTransform = "translate(180,300)";
 <?php include_once "vivian_tree_layout_common.js" ?>
 /*
 *  Function to handle the graph when selecting a new package
@@ -178,7 +180,12 @@ function _collapseAllNode() {
 
 function _resetAllNode() {
   resetAllNode(chart.nodes());
+  chart.svg().attr("transform", originalTransform);
   chart.update(chart.nodes());
+}
+
+function _centerDisplay() {
+  chart.svg().attr("transform", originalTransform);
 }
 
 function showDependency(entryNo) {
@@ -199,12 +206,30 @@ function showDependency(entryNo) {
     }
 
     resetAllNode(root);
-    d3.select("#treeview_placeholder").datum(root).call(chart);
 
+    d3.select("#treeview_placeholder").datum(root).call(chart);
+    chart.tree().nodeSize([10,80]);
+    chart.svg().attr("transform",originalTransform)
+    chart.update()
+    console.log(originalTransform);
+    chart.svg().call(zoomListener);
   });
 }
 $("#package_autocomplete").val(targetPackage);
 showDependency(initInstall)
+
+
+//Stolen from http://bl.ocks.org/robschmuecker/6afc2ecb05b191359862
+// =================================================================
+var panSpeed = 200;
+var zoomListener = d3.behavior.zoom().scaleExtent([1, 10]).on("zoom", zoom);
+function zoom() {
+    chart.svg()
+         .transition()
+           .attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+           
+}
+//===================================================================
     </script>
   </body>
 </html>
