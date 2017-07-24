@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <title>VHA Business Function Framework Demo</title>
+  <title>VHA Business Function Framework and Requirements</title>
   <head>
     <?php
       include_once "vivian_common_header.php";
@@ -35,13 +35,21 @@
     </div>
 
     <div id="dialog-modal">
-      <div id='namespaces' style="display:none"></div>
-      <div id='dependencies' style="display:none"></div>
       <div id="accordion">
         <h3><a href="#">Description</a></h3>
         <div id="description"></div>
         <h3 id="commentary_head" style="display:none"><a href="#">Commentary</a></h3>
         <div id="commentary"></div>
+        <h3 id="requirements_head" style="display:none"><a href="#">Requirements</a></h3>
+        <div id="requirements"></div>
+        <h3 id="bdID_head" style="display:none"><a href="#">Business Need: ID</a></h3>
+        <div id="bnID"></div>
+        <h3 id="needBFF_head" style="display:none"><a href="#">Business Need: BFF Links</a></h3>
+        <div id="bnBFFLink"></div>
+        <h3 id="bnNSR_head" style="display:none"><a href="#">Business Need: New Service Request</a></h3>
+        <div id="nsNSR"></div>
+        <h3 id="allReq" style="display:none"><a href="#">All Business Needs</a></h3>
+        <div id="nsNSR"><a target='_blank' href="files/requirements/All-Requirement%20List.html">All Needs</a></div>
       </div>
     </div>
   </br>
@@ -55,46 +63,103 @@
     logical groupings of sub-activities needed to fulfill each VHA business
     function. Click on an item to bring a modal window with detailed
     description and commentary.
+
+    See the legend for an explanation of the symbols and colors of the display.
+    The "collapsed" nodes can be expanded to show the "children" of that node.
     </p>
-    <p>This demo is based on BFF version 2.12.</p>
+    <p><b>Note:</b> Not all Business Needs can be found connected to a BFF Entry.  To see the listing
+    of all Business Needs, click <a target='_blank' href="files/requirements/All-Requirement%20List.html">here</a> </p>
+    <p>The current information is based on BFF version 2.12.</p>
+  </div>
+
+  <div id="buttons" style="position:relative; top:10px; right:-20px">
+    <button onclick="_collapseAllNode()">Collapse All</button>
+    <button onclick="_resetAllNode()">Reset</button>
   </div>
   <div id="legend_placeholder" style="position:relative; left:20px; top:20px;"></div>
+  </br>
   <div id="treeview_placeholder"></div>
 
 <script type="text/javascript">
 $("#accordion").accordion({heightStyle: 'content', collapsible: true}).hide();
 var chart = d3.chart.treeview()
-              .height(940)
+              .height(2000)
               .width(1880)
               .textwidth(280);
 var legendShapeChart = d3.chart.treeview()
-              .height(50)
-              .width(350)
+              .height(90)
+              .width(1300)
               .margins({top:42, left:10, right:0, bottom:0})
               .textwidth(110);
 
 <?php include_once "vivian_tree_layout_common.js" ?>
 
-var shapeLegend = [{name: "Framework Grouping", shape: "triangle-up"},
-                   {name: "Business Function", shape:"circle"}]
+var shapeLegend = [{name: "Framework Grouping (Collapsed)", shape: "triangle-up","_children":[],"hasRequirements": false, "depth": -10},
+                   {name: "Framework Grouping (Expanded)", shape: "triangle-up", "depth": -10},
+                   {name: "Framework Grouping with Needs (Collapsed)", shape: "triangle-up","_children":[],"hasRequirements": true, "depth": -10},
+                   {name: "Framework Grouping with Needs (Expanded)", shape: "triangle-up","children":[],"hasRequirements": true, "depth": -10},
+                   {name: "Business Function", shape:"circle","hasRequirements": false, "depth": 20},
+                   {name: "Business Function with Needs (Collapsed)", shape:"circle","hasRequirements": true,"_children":[], "depth": 20},
+                   {name: "Business Function with Needs (Expanded)", shape:"circle","hasRequirements": true, "depth": 20},
+                   {name: "Business Need", shape:"cross", "isRequirement": true, "depth": 20}
+                   ]
 
-d3.json("files/bff.json", function(json) {
-  resetAllNode(json);
-  chart.on("node", "event", "mouseover", node_onMouseOver)
-     .on("node", "event","mouseout", node_onMouseOut)
-     .on("node", "event","click", chart.onNodeClick)
-     .on("text", "attr", "cursor", function(d) {
-        return d.description !== undefined && d.description ? "pointer" : "hand";
-      })
-     .on("text", "event", "click", text_onMouseClick)
-     .on("path", "attr", "r", function(d) { return 7 - d.depth/2; });
-  d3.select("#treeview_placeholder").datum(json).call(chart);
-  d3.select("#legend_placeholder").datum(null).call(legendShapeChart);
-  createShapeLegend();
+d3.json("files/bff.json", function(BFFjson) {
+  d3.json("files/Requirements.json", function(reqjson) {
+    resetAllNode(BFFjson);
+    chart.on("node", "event", "mouseover", node_onMouseOver)
+       .on("node", "event","mouseout", node_onMouseOut)
+       .on("node", "event","click", node_onClick)
+       .on("text", "attr", "cursor", function(d) {
+          return d.description !== undefined && d.description ? "pointer" : "hand";
+        })
+       .on("text", "event", "click", text_onMouseClick)
+       .on("path", "attr", "r", function(d) { return 7 - d.depth/2; });
+
+    var combinedJSON = combineData(BFFjson,reqjson,"children")
+    var test = d3.select("#treeview_placeholder").datum(combinedJSON).call(chart);
+    d3.select("#legend_placeholder").datum(null).call(legendShapeChart);
+    createShapeLegend();
+  });
 });
 
 var toolTip = d3.select(document.getElementById("toolTip"));
 var header = d3.select(document.getElementById("head"));
+
+function combineData(bffData, reqData,parameter) {
+  bffData[parameter].forEach(function(d) {
+    if(d3.keys(reqData).indexOf(d.name) != -1) {
+      d.hasRequirements = true;
+      if(d._children) {
+        d._children = d._children.concat(reqData[d.name])
+      }
+      else {
+        d.leafFunction= true
+        d._children = reqData[d.name]
+      }
+    }
+    else {
+      if (d.children)  { combineData(d, reqData,"children")}
+      if (d._children) { combineData(d, reqData,"_children")}
+    }
+  });
+  return bffData
+}
+
+function node_onClick(d) {
+    //Check for the overall number of nodes shown to make sure screen isn't crowded
+    var addNodes = 0;
+    var rmNodes  = 0;
+    if(d._children) {  addNodes = d._children.length;}
+    if(d.children)  {  rmNodes = d.children.length;}
+    var newNodeSum = d3.selectAll(".node")[0].length + addNodes - rmNodes
+    if (newNodeSum < 350) {
+      chart.onNodeClick(d)
+    }
+    else {
+       alert("Adding any more nodes may cause the shown information to overlap.  Please close other opened nodes first")
+    }
+  };
 
 function node_onMouseOver(d) {
     if (d.number !== undefined){
@@ -108,15 +173,86 @@ function node_onMouseOver(d) {
            .style("opacity", ".9");
 }
 
+function getRequirementsURL(d){
+  var outstring = "<a target='_blank' href='files/requirements/"+d.name.replace('/','_')+"-Req.html'>Requirements for "+d.name+"</a>"
+  if(d.isRequirement) {
+    outstring="<ul>"
+    d.BFFlink.forEach(function(d) {
+       outstring += "<li> <a target='_blank' href='files/requirements/"+d.replace('/','_')+"-Req.html'>Requirements for "+d+"</a></li>"
+    });
+    outstring += "</ul>"
+  }
+
+  return outstring
+}
+
+function generateNSRURL(d) {
+  returnURLS = '<ul>'
+  d.NSRLink.forEach(function(nsrEntry) {
+    nsrVal = nsrEntry.split(":")[0]
+    returnURLS += "<li><a target='_blank' href='files/requirements/"+nsrVal+"-Req.html'>"+d.NSRLink+"</a></li>"
+  });
+  returnURLS += '</ul>'
+  return returnURLS
+
+}
+function getBusinessNeedURL(d) {
+  return "<a target='_blank' href='files/requirements/BFFReq-"+d.busNeedId+".html'>"+d.busNeedId+"</a>"
+}
+
+function modalForBFFGroup(d) {
+          if (d.hasRequirements){
+            $('#requirements').show();
+            $('#requirements_head').show();
+            $('#requirements').html(getRequirementsURL(d));
+          }
+          else{
+            $('#requirements').html('');
+            $('#requirements_head').hide();
+            $('#requirements').hide();
+          }
+}
+
+function modalForBusinessNeed(d) {
+          if (d.isRequirement){
+            $('#busNeedLink').html(getBusinessNeedURL(d));
+            $('#needLink_head').show();
+            $('#busNeedLink').show();
+            $("#bnID").html(getBusinessNeedURL(d))
+            $("#bdID_head").show();
+            $("#bnID").show();
+            $("#bnBFFLink").html(getRequirementsURL(d))
+            $("#needBFF_head").show();
+            $("#bnBFFLink").show();
+            $("#nsNSR").html(generateNSRURL(d))
+            $("#bnNSR_head").show();
+            $("#nsNSR").show();
+          }
+          else {
+            $('#busNeedLink').html('');
+            $('#needLink_head').hide();
+            $('#busNeedLink').hide();
+            $("#bdID_head").hide();
+            $("#bnID").hide();
+            $("#needBFF_head").hide();
+            $("#bnBFFLink").hide();
+            $("#bnNSR_head").hide();
+            $("#nsNSR").hide();
+          }
+
+}
+
 function text_onMouseClick(d) {
   if (d.description) {
+    var modalTitle = d.name;
+    if (d.number){modalTitle = "" + d.number + ": " + modalTitle }
     var overlayDialogObj = {
       autoOpen: true,
       height: 'auto',
       width: 700,
       modal: true,
       position: {my: "center center-50", of: window},
-      title: "" + d.number + ": " + d.name,
+      title:modalTitle,
       open: function(){
           $('#description').html(d.description);
           if (d.commentary){
@@ -128,6 +264,14 @@ function text_onMouseClick(d) {
             $('#commentary').html('');
             $('#commentary_head').hide();
             $('#commentary').hide();
+          }
+          modalForBFFGroup(d);
+          modalForBusinessNeed(d);
+          if (d.hasRequirements || d.isRequirement) {
+            $("#allReq").show();
+          }
+          else{
+           $("#allReq").hide();
           }
           $('#accordion').accordion("option", "active", 0);
           $('#accordion').accordion("refresh");
@@ -153,10 +297,21 @@ function createShapeLegend() {
       .data(shapeLegend)
       .enter().append("svg:g")
       .attr("class", "shapeLegend")
-      .attr("transform", function(d, i) { return "translate("+(i * 200) +", -10)"; })
+      .attr("transform", function(d, i) { return "translate("+(i% 4 * 310) +","+ d.depth+")"; })
   shapeLegendDisplay.append("path")
       .attr("class", function(d) {return d.name;})
       .attr("d", d3.svg.symbol().type(function(d) { return d.shape;}))
+      .style("fill", function(d) {
+          var color = "lightsteelblue"
+          if (d.hasRequirements) { color = "MidnightBlue"}
+          return d._children ? color : "#FFF";
+      })
+      .style("stroke", function(d) {
+        var color = "lightsteelblue"
+        if (d.hasRequirements || d.isRequirement) { color = "MidnightBlue"}
+        return color
+      })
+      //      "stroke": function(d) {chart.findNodeStroke(d)},
       .attr("r", 3);
 
   shapeLegendDisplay.append("svg:text")
@@ -173,7 +328,7 @@ function createShapeLegend() {
           .attr("y", -28 )
           .attr("text-anchor", "left")
           .style("font-size", "16px")
-          .text("Shape Legend");
+          .text("Legend");
 }
     </script>
   </body>
