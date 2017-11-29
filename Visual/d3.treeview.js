@@ -219,6 +219,9 @@ d3.chart.treeview = function(option) {
     } else if (d.isSubpackage) {
       shape = "square";
     }
+    if (d.isFieldGroup) {
+      shape = "cross";
+    }
     return shape;
   }
 

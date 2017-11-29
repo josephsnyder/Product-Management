@@ -32,6 +32,13 @@
               <li><a href="patchDependency.php">Install Dependency Tree</a></li>
             </ul>
           </li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">VistA File Interaction<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="ERDiag.php">File Dependency</a></li>
+              <li><a href="ERDiag_tree.php">File Information Tree</a></li>
+            </ul>
+          </li>
           <li class="dropdown" id="vista-interfaces">
             <a class="dropdown-toggle" data-toggle="dropdown" href="#">VistA Interfaces<span class="caret"></span></a>
             <ul class="dropdown-menu">
