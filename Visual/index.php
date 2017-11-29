@@ -106,6 +106,7 @@ var header = d3.select(document.getElementById("header1"));
 var selectedIndex = 0;
 var distProp = [ // constants to store property of each distribution
   { name: "All", color: "black", distribution: 'All', doxlink: package_link_url},
+  { name: "Local", color: "black", distribution: 'All', doxlink: "files/dox/"},
   { name: "OSEHRA", color: "#FF0000", distribution: 'OSEHRA VistA', doxlink: "http://code.osehra.org/OSEHRA_dox/"},
   { name: "VA", color: "#3300CC", distribution: 'VA FOIA VistA' ,doxlink: package_link_url},
   { name: "DSS", color: "#080", distribution: 'DSS vxVistA' , doxlink: "http://code.osehra.org/dox_alpha/vxvista/"}
