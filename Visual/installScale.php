@@ -285,8 +285,10 @@ function resetMenuFile(packageName,start,stop) {
         .attr('y', function(d) { return y(.01* ((d.numFiles||1) + (d.numRoutines||1)));})
         // This needs to be done to make all the bars touch the xAxis
         .attr('height', function(d) { return(chartHeight - y(.01* ((d.numFiles||1) + (d.numRoutines||1))))})
-        .attr("fill", function(d,i) {return colors(i); }) ;  //*/;
-
+        .attr("fill", function(d,i) {return colors(i); })
+        .attr('stroke', "black")
+        .attr('stroke-linecap', 'butt')
+        .attr('stroke-width', .5)
       /*
       *  Set all of the ".bar" classed bars, all of the install information, to have the
       *  mouse events described above.

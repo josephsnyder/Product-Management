@@ -13,9 +13,5 @@
   .backgroundBar {
     opacity: 0.4;
   }
-  .bar {
-     stroke: black;
-     stroke-width: .5px;
-  }
 
   </style>
