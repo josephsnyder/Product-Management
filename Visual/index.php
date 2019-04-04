@@ -112,6 +112,8 @@ var packageInfoProp = {
   "himInfo": {"func": getHIMLink, "title": "HIM Info"},
   "description": {"func": getDescriptionHtml, "title": "Description"},
   "status": {"func": getStatusHtml, "title": "Status"},
+  "gui": {"func": getGUIHtml, "title": "GUI"},
+  "vdl": {"func": getVDLHtml, "title": "VDL Links"}
 }
 var shapeLegend = [{name: "Package Category", shape: "triangle-up"},
                    {name: "Package", shape:"circle"}]
@@ -213,6 +215,18 @@ function getDescriptionHtml(pkgName, d) {
 
 function getStatusHtml(pkgName, d) {
   return d.status
+}
+function getGUIHtml(pkgName, d) {
+  return d.gui
+}
+
+function getVDLHtml(pkgName, d) {
+  var outtext = '';
+  outtext += "<a href='" + d.vdl + "'>VDL Entry</a></br>"
+  if (d['gui-vdl']) {
+    outtext += "<a href='" + d['gui-vdl'] + "'>VDL Entry (GUI)</a></br>"
+  }
+  return outtext
 }
 
 function getPackageDoxLink(pkgName, node) {
