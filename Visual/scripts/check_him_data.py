@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #---------------------------------------------------------------------------
+from __future__ import print_function
+
 from selenium import webdriver
 import json
 import re
@@ -20,7 +22,8 @@ import re
 def run():
   # Navigate to non-frame version
   driver = webdriver.Firefox()
-  driver.get("http://him.osehra.org/content/_Z.x.p.iA.l.y.vE.eGK.k79K-A.nV2A-top-summary.html")
+  #driver = webdriver.Chrome()
+  driver.get("https://him.osehra.org/content/_Z.x.p.iA.l.y.vE.eGK.k79K-A.nV2A-top-summary.html")
 
   # Get a list of all of the packages
   package_names = []
@@ -42,13 +45,13 @@ def run():
           if not "Main" == subpackage_name and not "Enumerations" in subpackage_name:
             generated_packages[_convert(subpackage_name)] = subpackage.get_attribute("href")
     except Exception as e:
-      print "Failed to parse package " + name
-      print e
+      print("Failed to parse package " + name)
+      print(e)
     finally:
       driver.back()
 
   # write new file
-  #print "\nWriting data to himData_new.json\n"
+  #print("\nWriting data to himData_new.json\n")
   #with open('himData_new.json', 'w') as outfile:
   #  json.dump(generated_packages, outfile)
 
@@ -58,28 +61,30 @@ def run():
 
   new_packages = {}
   for name, href in generated_packages.items():
-    if not name in data.keys():
+    if not name in data:
       new_packages[name] = href
-    elif 'http://him.osehra.org/content/' + data[name] != href:
-      print "Link is different for", name, href
+    elif 'https://him.osehra.org/content/' + data[name] != href:
+      print("Link is different for", name)
+      print("    Found    ", href)
+      print("    Expected ", 'https://him.osehra.org/content/',data[name])
 
-  print "\nFound the following new packages:\n"
+  print("\nFound the following new packages:\n")
   to_skip = ["Barcoding", # Note: Using the link from Pharmacy/BCMA
              "Common"]
-  new_package_names = new_packages.keys()
+  new_package_names = list(new_packages.keys())
   new_package_names.sort()
   for new_package in new_package_names:
     if new_package not in to_skip:
-      print new_package, new_packages[new_package]
+      print(new_package, new_packages[new_package])
 
   removed_packages = []
   for name, href in data.items():
-    if not name in generated_packages.keys():
+    if not name in generated_packages:
       removed_packages.append(name)
 
   removed_packages.sort()
-  print "\nMissing the following packages:\n"
-  print "\n".join(removed_packages)
+  print("\nMissing the following packages:\n")
+  print("\n".join(removed_packages))
 
   driver.close()
 
@@ -102,7 +107,7 @@ def _convert(name):
                    "Vitals": "General Medical Record - Vitals"}
   # Remove leading and trailing characters
   name = name.strip()
-  if name in special_cases.keys():
+  if name in special_cases:
     return special_cases[name]
   elif name.find(' ') >= 0:
     return name
