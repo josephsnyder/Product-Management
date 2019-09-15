@@ -14,6 +14,7 @@
 # limitations under the License.
 #---------------------------------------------------------------------------
 
+from builtins import str
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -42,7 +43,7 @@ class test_pkgdepchart(unittest.TestCase):
     for type in chart_container:  # depends, dependents
       rects = type.find_elements_by_tag_name("rect")
       for rect in rects:
-          if rect.get_attribute("height") > 0:
+          if int(rect.get_attribute("height")) > 0:
               break
       else:
           self.fail("Failed to find data in Dependency Chart")
@@ -69,7 +70,7 @@ class test_pkgdepchart(unittest.TestCase):
     self.assertEqual(title_element.text, 'VistA Packages Dependencies Chart')
 
     # Ensure that legends have proper information
-    dep_chart_legend = ['depends','dependents']
+    dep_chart_legend = ['depends', 'dependents']
     chart_legend = driver.find_element_by_class_name("highcharts-legend")
     legend_array = chart_legend.find_elements_by_tag_name("text")
     for item in legend_array:
@@ -146,7 +147,7 @@ class test_pkgdepchart(unittest.TestCase):
       self.assertEqual(title_element.text, 'VistA Package Statistics')
 
       # Ensure that legends have proper information
-      stat_chart_legend = ['routines','files','fields']
+      stat_chart_legend = ['routines', 'files', 'fields']
       chart_legend = driver.find_element_by_class_name("highcharts-legend")
       legend_array = chart_legend.find_elements_by_tag_name("text")
       for item in legend_array:

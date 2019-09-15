@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #---------------------------------------------------------------------------
+from __future__ import print_function
 
 # Requires the PILLOW Python library
 #
 # Installation instructions are found here:
 #    http://pillow.readthedocs.org/en/3.0.x/installation.html
 #
+
+from builtins import str
 from PIL import Image
 from PIL import ImageChops
 import os
@@ -50,7 +53,7 @@ def take_screenshot(driver, imageName, targetObj):
     loc = targetObj.location
     size = targetObj.size
     driver.save_screenshot("tmpImage.png")
-    boundBox = (int(loc['x']),int(loc['y']),int(loc['x']+size['width']),int(loc['y']+size['height']))
+    boundBox = (int(loc['x']), int(loc['y']), int(loc['x']+size['width']), int(loc['y']+size['height']))
     tmpImage = Image.open("tmpImage.png")
     tmpImage.crop(boundBox).save(imageName)
 
@@ -62,22 +65,22 @@ def compareImg(imageRoot):
   new = Image.open(newFileName)
   old = Image.open(oldFileName)
 
-  diff = ImageChops.difference(old,new)
+  diff = ImageChops.difference(old, new)
   count = count_nonblack_pil(diff)
   if count >= 66000:
     # need to save as .gif to set transparency which is zeroed by difference.
-    diff.save(compFileName,"GIF", transparency=255)
-  # Output XML for Dart  Necessary for the upload of the image after
-    print "<DartMeasurement name=\"ImageError\" type=\"numeric/double\">"+str(count)
-    print "</DartMeasurement>"
-    print "<DartMeasurement name=\"BaselineImage\" type=\"text/string\">Standard</DartMeasurement>"
-    print "<DartMeasurementFile name=\"TestImage\" type=\"image/jpeg\">" + newFileName
-    print"</DartMeasurementFile>"
-    print"<DartMeasurementFile name=\"DifferenceImage\" type=\"image/jpeg\">" + compFileName
-    print"</DartMeasurementFile>"
-    print"<DartMeasurementFile name=\"ValidImage\" type=\"image/jpeg\"> " + oldFileName
-    print"</DartMeasurementFile>"
+    diff.save(compFileName, "GIF", transparency=255)
+    # Output XML for Dart  Necessary for the upload of the image after
+    print("<DartMeasurement name=\"ImageError\" type=\"numeric/double\">"+str(count))
+    print("</DartMeasurement>")
+    print("<DartMeasurement name=\"BaselineImage\" type=\"text/string\">Standard</DartMeasurement>")
+    print("<DartMeasurementFile name=\"TestImage\" type=\"image/jpeg\">" + newFileName)
+    print("</DartMeasurementFile>")
+    print("<DartMeasurementFile name=\"DifferenceImage\" type=\"image/jpeg\">" + compFileName)
+    print("</DartMeasurementFile>")
+    print("<DartMeasurementFile name=\"ValidImage\" type=\"image/jpeg\"> " + oldFileName)
+    print("</DartMeasurementFile>")
     return False
   else:
-    diff.save(compFileName,"GIF", transparency=255)
+    diff.save(compFileName, "GIF", transparency=255)
     return True
