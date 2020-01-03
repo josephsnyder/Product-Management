@@ -5,6 +5,8 @@
     <?php
       include_once "vivian_common_header.php";
       include_once "install_scale.css";
+      include_once "vivian_google_analytics.php";
+      include_once "vivian_osehra_image.php";
     ?>
     <!-- JQuery Buttons -->
     <script>
@@ -31,15 +33,11 @@
       });
 
     </script>
-    <?php include_once "vivian_google_analytics.php" ?>
+
   </head>
 
 <body>
   <script src="jquery-ui.min.js"></script>
-  <div>
-    <?php include_once "vivian_osehra_image.php" ?>
-    <!-- <select id="category"></select> -->
-  </div>
   <!-- Tooltip -->
      <div id="toolTip" class="tooltip" style="opacity:0;">
       <div id="header1" class="header"></div>
